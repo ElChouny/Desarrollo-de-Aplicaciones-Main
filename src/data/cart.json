@@ -1,0 +1,41 @@
+{
+    "total": 2000,
+    "products": [
+        {
+            "id": 0,
+            "title": "Samsung Galaxy S24 Ultra",
+            "description": "Crystal chandelier maria theresa for 12 light",
+            "price": 1299.99,
+            "discountPercentage": 16,
+            "rating": 4.74,
+            "stock": 500,
+            "brand": "Samsung",
+            "category": "Smartphones",
+            "thumbnail": "https://i.ibb.co/XLBwknH/image.png",
+            "images": [
+                "https://i.dummyjson.com/data/products/100/1.jpg",
+                "https://i.dummyjson.com/data/products/100/2.jpg",
+                "https://i.dummyjson.com/data/products/100/3.jpg",
+                "https://i.dummyjson.com/data/products/100/thumbnail.jpg"
+            ]
+        },
+        {
+            "id": 7,
+            "title": "Samsung Galaxy Book",
+            "description": "Samsung Galaxy Book S (2020) Laptop With Intel Lakefield Chip, 8GB of RAM Launched",
+            "price": 1499,
+            "discountPercentage": 4.15,
+            "rating": 4.25,
+            "stock": 50,
+            "brand": "Samsung",
+            "category": "laptops",
+            "thumbnail": "https://i.dummyjson.com/data/products/7/thumbnail.jpg",
+            "images": [
+                "https://i.dummyjson.com/data/products/7/1.jpg",
+                "https://i.dummyjson.com/data/products/7/2.jpg",
+                "https://i.dummyjson.com/data/products/7/3.jpg",
+                "https://i.dummyjson.com/data/products/7/thumbnail.jpg"
+            ]
+        }
+    ]
+}
