@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet, Pressable } from 'react-native'
 import InputForm from '../components/InputForm'
-import SubmitButton from '../components/SubmitButton'
+import SubmitButton from '../components/SubmitButton';
 import Colors from '../globals/Colors'
 import { useNavigation } from '@react-navigation/native'
 import { useSignUpMutation } from '../services/auth'
 import { useDispatch } from 'react-redux'
-import { setUser } from '../features/userSlice'
-import { signupSchema } from '../validations/signupSchema'
+import signupSchema from '../validations/signupSchema';
+import { setUser } from '../features/userSlice';
+
 
 
 
@@ -24,40 +25,45 @@ const Signup = () => {
     const dispatch = useDispatch()
 
 
-
-
     const onSubmit = async () => {
+        console.log("onSubmit se ejecutó"); // <- Esto debe aparecer en la consola
+        console.log("Datos de entrada:", { email, password, confirmPassword });
+
+        if (!email || !password || !confirmPassword) {
+            console.error("Todos los campos son requeridos");
+            return;
+        }
+
         try {
-            signupSchema.validateSync({ email, password, confirmPassword })
-            const response = await triggerSignup({ email, password })
+            signupSchema.validateSync({ email, password, confirmPassword });
+            const response = await triggerSignup({ email, password });
+            console.log("Respuesta del servidor:", response);
             const user = {
                 email: response.data.email,
                 idToken: response.data.idToken,
-                localId: response.data.localId
-            }
-            dispatch(setUser(user))
+            };
+            dispatch(setUser(user));
+            console.log("Usuario registrado:", user);
         } catch (error) {
+            console.error("Error en el registro:", error);
             switch (error.path) {
                 case "email":
-                    setEmailError(error.message)
-                    setPasswordError("")
-                    setConfirmPasswordError("")
-                    break
+                    setEmailError(error.message);
+                    setPasswordError("");
+                    break;
                 case "password":
-                    setPasswordError(error.message)
-                    setEmailError("")
-                    setConfirmPasswordError("")
-                    break
+                    setPasswordError(error.message);
+                    break;
                 case "confirmPassword":
-                    setConfirmPasswordError(error.message)
-                    setEmailError("")
-                    setPasswordError("")
-                    break
+                    setConfirmPasswordError(error.message);
+                    setEmailError("");
+                    setPasswordError("");
+                    break;
+                default:
+                    console.error("Error desconocido:", error);
             }
         }
     }
-
-
     return (
         <View style={styles.main}>
             <View style={styles.container}>
@@ -96,7 +102,6 @@ const Signup = () => {
 }
 
 
-export default Signup
 
 
 const styles = StyleSheet.create({
@@ -130,3 +135,6 @@ const styles = StyleSheet.create({
         color: Colors.lightGray
     }
 })
+
+
+export default Signup

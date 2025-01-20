@@ -6,8 +6,7 @@ import SubmitButton from '../components/SubmitButton'
 import { useNavigation } from '@react-navigation/native'
 import { useLoginMutation } from '../services/auth'
 import { useDispatch } from 'react-redux'
-import { setUser } from '../features/userSlice'
-import { loginSchema } from '../validations/loginSchema'
+import loginSchema from "../validations/loginSchema"
 
 
 const Login = () => {
@@ -21,16 +20,14 @@ const Login = () => {
     const dispatch = useDispatch()
 
 
+
     const onSubmit = async () => {
-
         try {
-            loginSchema.validateSync({ email, password })
+            loginSchema.validateSymc({ email, password })
             const response = await triggerLogin({ email, password })
-
             const user = {
                 email: response.data.email,
                 idToken: response.data.idToken,
-                localId: response.data.localId
             }
             dispatch(setUser(user))
         } catch (error) {
@@ -38,16 +35,14 @@ const Login = () => {
                 case "email":
                     setEmailError(error.message)
                     setPasswordError("")
-                    break
+                    break;
                 case "password":
-                    setPasswordError(error.message)
                     setEmailError("")
-                    break
+                    setPasswordError(error.message)
+                    break;
             }
         }
     }
-
-
     return (
         <View style={styles.main}>
             <View style={styles.container}>
@@ -76,8 +71,7 @@ const Login = () => {
     )
 }
 
-
-export default Login
+export default Login;
 
 
 const styles = StyleSheet.create({

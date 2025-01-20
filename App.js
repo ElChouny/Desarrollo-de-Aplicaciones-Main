@@ -5,7 +5,7 @@ import Fonts from './src/globals/Fonts'
 import Navigator from './src/navigation/Navigator'
 import { Provider } from 'react-redux'
 import { store } from './src/store'
-import MainNavigator from './src/navigation/MainNavigator'
+
 
 export default function App() {
 
