@@ -13,5 +13,3 @@ export const signupSchema = object({
         .required("Email es requerido"),
     
 })
-
-export default signupSchema

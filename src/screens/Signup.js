@@ -1,16 +1,14 @@
-import { useState } from 'react'
-import { View, Text, StyleSheet, Pressable } from 'react-native'
-import InputForm from '../components/InputForm'
+import { useState } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import InputForm from '../components/InputForm';
 import SubmitButton from '../components/SubmitButton';
-import Colors from '../globals/Colors'
-import { useNavigation } from '@react-navigation/native'
-import { useSignUpMutation } from '../services/auth'
-import { useDispatch } from 'react-redux'
+import Colors from '../globals/Colors';
+import { useNavigation } from '@react-navigation/native';
+import { useSignUpMutation } from '../services/auth';
+import { useDispatch } from 'react-redux';
 import signupSchema from '../validations/signupSchema';
 import { setUser } from '../features/userSlice';
-
-
-
+import { deleteSesion, insertSession } from '../config/dbSqlite';
 
 const Signup = () => {
 
@@ -24,46 +22,31 @@ const Signup = () => {
     const [triggerSignup] = useSignUpMutation()
     const dispatch = useDispatch()
 
-
     const onSubmit = async () => {
-        console.log("onSubmit se ejecutó"); // <- Esto debe aparecer en la consola
-        console.log("Datos de entrada:", { email, password, confirmPassword });
-
-        if (!email || !password || !confirmPassword) {
-            console.error("Todos los campos son requeridos");
-            return;
-        }
-
         try {
+            console.log('Validating input...');
             signupSchema.validateSync({ email, password, confirmPassword });
+            console.log('Input validated. Triggering signup...');
             const response = await triggerSignup({ email, password });
-            console.log("Respuesta del servidor:", response);
+            console.log('Signup successful:', response);
             const user = {
                 email: response.data.email,
                 idToken: response.data.idToken,
+                localId: response.data.localId
             };
             dispatch(setUser(user));
-            console.log("Usuario registrado:", user);
+            console.log('Deleting old session...');
+            await deleteSesion();
+            console.log('Inserting new session...');
+            await insertSession(user.localId, user.email, user.idToken);
+            console.log('User registered and session saved.');
+            navigation.navigate('Home');
         } catch (error) {
-            console.error("Error en el registro:", error);
-            switch (error.path) {
-                case "email":
-                    setEmailError(error.message);
-                    setPasswordError("");
-                    break;
-                case "password":
-                    setPasswordError(error.message);
-                    break;
-                case "confirmPassword":
-                    setConfirmPasswordError(error.message);
-                    setEmailError("");
-                    setPasswordError("");
-                    break;
-                default:
-                    console.error("Error desconocido:", error);
-            }
+            console.error('Error during signup:', error);
+            setPasswordError(error.message);
         }
-    }
+    };
+
     return (
         <View style={styles.main}>
             <View style={styles.container}>
@@ -90,7 +73,7 @@ const Signup = () => {
                     error={confirmPasswordError}
 
                 />
-                <SubmitButton title="Registrarme" onPress={onSubmit}
+                <SubmitButton style={styles.title} title="Registrarme" onPress={onSubmit}
                 />
                 <Text style={styles.sub}>Tenes cuenta registrada?</Text>
                 <Pressable onPress={() => navigation.navigate("Login")} >
@@ -102,39 +85,30 @@ const Signup = () => {
 }
 
 
-
-
 const styles = StyleSheet.create({
     main: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: Colors.lightGray,
     },
     container: {
-        width: "90%",
+        width: '80%',
+        padding: 20,
         backgroundColor: Colors.Arena,
-        gap: 15,
         borderRadius: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 20
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
     },
     title: {
-        fontSize: 22,
-        fontFamily: "Lobster",
-        color: Colors.lightGray
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
     },
-    sub: {
-        fontSize: 14,
-        fontFamily: "Josefin",
-        color: Colors.lightGray
-    },
-    subLink: {
-        fontSize: 14,
-        fontFamily: "Josefin",
-        color: Colors.lightGray
-    }
-})
+});
 
-
-export default Signup
+export default Signup;

@@ -1,25 +1,37 @@
 import { StyleSheet, Text, View } from 'react-native'
 import Entypo from '@expo/vector-icons/Entypo';
 import Colors from '../globals/Colors';
+import { useDeleteCartProductMutation } from '../services/carts';
+import { useSelector } from 'react-redux';
 
 const CardCartProduct = ({ product }) => {
-    const { title, description, price } = product
+    const { title, description, price, quantity } = product
+    const localId = useSelector(state => state.user.localId)
+    const [triggerDeleteItemCart] = useDeleteCartProductMutation()
+
+    const deleteCartProduct = () => {
+        triggerDeleteItemCart({ localId, productId: product.id })
+    }
     return (
         <View style={styles.container}>
             <View style={styles.content}>
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.description}>{description}</Text>
                 <View style={styles.containerText}>
-                    <Text style={styles.text}>Precio: ${price}  USD</Text>
-                    <Text style={styles.text}>Cantidad: 1</Text>
+                    <Text style={styles.text}>Precio: {price}$  ARG</Text>
+                    <Text style={styles.text}>Cantidad: {quantity}</Text>
                 </View>
             </View>
-            <Entypo name="trash" size={30} color={Colors.lightGray} />
+            <Pressable onPress={deleteCartProduct}>
+                <Entypo name="trash" size={30} color={colors.lightGray} />
+            </Pressable>
+
         </View>
     )
 }
 
 export default CardCartProduct
+
 
 const styles = StyleSheet.create({
     container: {

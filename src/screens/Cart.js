@@ -1,26 +1,52 @@
-import { StyleSheet, Text, View, FlatList, Pressable } from "react-native";
-import cart from '../data/cart.json';
-import CardCartProduct from '../components/CardCartProduct';
+import { StyleSheet, Text, View, FlatList, Pressable } from 'react-native'
+import CardCartProduct from '../components/CardCartProduct'
 import Colors from '../globals/Colors'
 import { usePostOrdersMutation } from '../services/orders'
+import { useSelector } from 'react-redux'
+import { useGetCartQuery, useDeleteCartMutation } from '../services/carts'
+import { useEffect, useState } from 'react'
+import EmptyListComponent from '../components/EmptyListComponent'
+import LoadingSpinner from '../components/LoadingSpinner'
+import { useNavigation } from '@react-navigation/native'
 
 const Cart = () => {
-
+    const navigation = useNavigation()
     const [triggerPost] = usePostOrdersMutation()
+    const [triggerDeleteCart] = useDeleteCartMutation()
+    const localId = useSelector(state => state.user.localId)
+    const { data: cart, isLoading } = useGetCartQuery({ localId })
+    const [total, setTotal] = useState(0)
+
+    useEffect(() => {
+        if (cart) {
+            setTotal(cart.reduce((acc, item) => acc + item.price * item.quantity, 0))
+        }
+    }, [cart])
+
+
 
     const confirmCart = () => {
-        triggerPost({ id: "2", products: [{ id: "2" }], total: 120 })
+        const createdAt = new Date().toLocaleString()
+        const order = {
+            products: cart,
+            createdAt,
+            total
+        }
+        triggerPost({ order, localId })
+        triggerDeleteCart({ localId })
+        navigation.navigate("OrdersStack")
     }
-
+    if (isLoading) return <LoadingSpinner />
+    if (!cart) return <EmptyListComponent message="No hay productos en el carrito" />
     return (
         <View style={styles.container}>
             <FlatList
-                data={cart.products}
+                data={cart}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => <CardCartProduct product={item} />}
             />
             <View style={styles.containerTotal}>
-                <Text style={styles.text}>Total: ${cart.total} USD </Text>
+                <Text style={styles.text}>Total: {total} $ ARG </Text>
                 <Pressable style={styles.button} onPress={confirmCart}>
                     <Text style={styles.buttonText}>Finalizar Compra</Text>
                 </Pressable>

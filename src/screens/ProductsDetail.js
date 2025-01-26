@@ -1,25 +1,65 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
-import Header from '../components/Header'
 import Colors from '../globals/Colors'
+import { useGetProductCartQuery, usePostCartMutation } from '../services/carts'
+import { useSelector } from 'react-redux'
+import { useNavigation } from '@react-navigation/native'
+import Counter from '../components/Counter'
+import { useState } from 'react'
 
-const ProductsDetail = ({ route }) => {
-    
-    const {product} =route.params
+const ProductDetail = ({ route }) => {
+
+    const [quantity, setQuantity] = useState(1)
+    const navigation = useNavigation()
+    const { product } = route.params
+    const localId = useSelector(state => state.user.localId)
+    const [triggerAddProduct] = usePostCartMutation()
+    const { data: productCart } = useGetProductCartQuery({ localId, productId: product.id })
+
+    const increment = () => {
+        const cartQuantity = productCart ? productCart.quantity : 0
+        if (quantity >= (product.stock - cartQuantity)) return
+        setQuantity(quantity + 1)
+    }
+
+    const decrement = () => {
+        if (quantity === 1) return
+        setQuantity(quantity - 1)
+    }
+
+    const handleAddproduct = async () => {
+
+        const cartQuantity = productCart ? productCart.quantity : 0
+        if ((product.stock - cartQuantity) === 0) return
+        const newQuantity = quantity + cartQuantity
+        const cartProduct = {
+            ...product,
+            quantity: newQuantity
+        }
+        const result = await triggerAddProduct({ localId, cartProduct })
+        setQuantity(1)
+        navigation.navigate("CartStack")
+    }
 
     return (
         <View style={styles.container}>
             <Image source={{ uri: product.thumbnail }} style={styles.image} resizeMode='contain' />
             <Text style={styles.title}>{product.title}</Text>
             <Text style={styles.description}>{product.description}</Text>
-            <Text style={styles.price}>Precio: ${product.price} USD</Text>
-            <Pressable style={styles.button}>
+            <Text style={styles.price}>Precio: {product.price} $ ARG</Text>
+            {
+                (product.stock - productCart?.quantity) === 0 ?
+                    <Text style={styles.price}>Producto sin stock</Text>
+                    :
+                    <Counter quantity={quantity} increment={increment} decrement={decrement} />
+            }
+            <Pressable style={styles.button} onPress={handleAddproduct}>
                 <Text style={styles.textButton}>Agregar al carrito</Text>
             </Pressable>
         </View>
     )
 }
 
-export default ProductsDetail;
+export default ProductDetail
 
 const styles = StyleSheet.create({
     container: {

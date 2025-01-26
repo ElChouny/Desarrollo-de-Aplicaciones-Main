@@ -3,17 +3,13 @@ import ShadowCard from './wrapper/ShadowCard'
 import Colors from '../globals/Colors'
 import TextPrimary from './TextPrimary'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch } from 'react-redux'
-import { setProductsFilteredByCategory } from '../features/shopSlice'
 
 const CardItemCategory = ({ item: category }) => {
 
     const navigation = useNavigation()
-    const dispach = useDispatch()
 
     return (
         <Pressable onPress={() => {
-            dispach(setProductsFilteredByCategory(category))
             navigation.navigate("ProductsByCategory", { category })
 
         }}>

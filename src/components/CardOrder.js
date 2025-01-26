@@ -4,13 +4,11 @@ import Colors from '../globals/Colors';
 
 const CardOrder = ({ order }) => {
 
-    const date = new Date(order.createdAt).toLocaleString()
-
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.text}>{date}</Text>
-                <Text style={styles.text}>Total: ${order.total}  USD</Text>
+                <Text style={styles.text}>{order.createdAt}</Text>
+                <Text style={styles.text}>Total: {order.total} $ ARG</Text>
             </View>
             <AntDesign name="search1" size={30} color={Colors.lightGray} />
         </View>

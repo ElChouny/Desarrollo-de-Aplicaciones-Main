@@ -10,7 +10,7 @@ export const authApi = createApi({
                 url: `accounts:signUp?key=${api_key}`,
                 method: "POST",
                 body: credentials,
-                returnSecureToken: true
+
             })
         }),
         login: builder.mutation({
@@ -18,7 +18,7 @@ export const authApi = createApi({
                 url: `accounts:signInWithPassword?key=${api_key}`,
                 method: "POST",
                 body: credentials,
-                returnSecureToken: true
+
             })
         }),
     })

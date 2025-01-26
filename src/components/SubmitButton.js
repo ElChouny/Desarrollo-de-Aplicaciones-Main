@@ -1,26 +1,20 @@
-import { StyleSheet, Text, Pressable } from 'react-native'
-import Colors from '../globals/Colors'
-
+import { StyleSheet, Text, Pressable } from 'react-native';
+import Colors from '../globals/Colors';
 
 const SubmitButton = ({ title, onPress }) => {
-
     return (
         <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.text}>{title}</Text>
         </Pressable>
-    )
-}
-
-
-export default SubmitButton
-
+    );
+};
 
 const styles = StyleSheet.create({
     button: {
         width: "60%",
         backgroundColor: Colors.Arena,
         padding: 10,
-        alignItems: "enter",
+        alignItems: "center",
         borderRadius: 10
     },
     text: {
@@ -28,4 +22,6 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 18
     }
-})
+});
+
+export default SubmitButton;

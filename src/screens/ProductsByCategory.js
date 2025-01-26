@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react'
 import Search from '../components/Search'
 import CardProduct from '../components/CardProduct'
 import { useGetProductsQuery } from '../services/shop'
-import { useGetCategoriesQuery } from '../services/shop'
+import LoadingSpinner from '../components/LoadingSpinner'
+
+
+
 const ProductsByCategory = ({ route }) => {
 
 
@@ -19,6 +22,12 @@ const ProductsByCategory = ({ route }) => {
     }, [isSuccess, data])
 
     useEffect(() => {
+        if (isError) {
+            console.log(error)
+        }
+    }, [isError, error])
+
+    useEffect(() => {
 
         if (isSuccess) {
             setProducts(Object.values(data).filter(product => product.title.includes(keyword)))
@@ -26,8 +35,9 @@ const ProductsByCategory = ({ route }) => {
 
     }, [keyword, isSuccess])
 
-    if (isLoading) return <View><Text>cargando</Text></View>
+    if (isLoading) return <LoadingSpinner />
     if (isError) return <View><Text>{error.message}</Text></View>
+
 
 
     return (
