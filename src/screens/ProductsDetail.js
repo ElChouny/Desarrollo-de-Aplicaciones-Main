@@ -45,7 +45,7 @@ const ProductDetail = ({ route }) => {
             <Image source={{ uri: product.thumbnail }} style={styles.image} resizeMode='contain' />
             <Text style={styles.title}>{product.title}</Text>
             <Text style={styles.description}>{product.description}</Text>
-            <Text style={styles.price}>Precio: {product.price} $ ARG</Text>
+            <Text style={styles.price}>Precio: ${product.price}  USD</Text>
             {
                 (product.stock - productCart?.quantity) === 0 ?
                     <Text style={styles.price}>Producto sin stock</Text>

@@ -1,13 +1,13 @@
-import { configureStore } from "@reduxjs/toolkit"
-import counterReducer from '../features/counterSlice'
-import shopReducer from '../features/shopSlice'
-import { shopApi } from "../services/shop"
-import { ordersApi } from "../services/orders"
-import { setupListeners } from "@reduxjs/toolkit/query"
-import { authApi } from "../services/auth"
-import userReducer from "../features/userSlice"
-import { userApi } from "../services/user"
-import { cartApi } from "../services/carts"
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from '../features/counterSlice';
+import shopReducer from '../features/shopSlice';
+import { shopApi } from "../services/shop";
+import { ordersApi } from "../services/orders";
+import { setupListeners } from "@reduxjs/toolkit/query";
+import authApi from "../services/auth"; // Asegúrate de importar authApi correctamente
+import userReducer from "../features/userSlice";
+import { userApi } from "../services/user";
+import { cartApi } from "../services/carts";
 
 export const store = configureStore({
     reducer: {
@@ -21,7 +21,13 @@ export const store = configureStore({
         [cartApi.reducerPath]: cartApi.reducer
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(shopApi.middleware, ordersApi.middleware, authApi.middleware, userApi.middleware, cartApi.middleware),
-})
+        getDefaultMiddleware().concat(
+            shopApi.middleware,
+            ordersApi.middleware,
+            authApi.middleware,
+            userApi.middleware,
+            cartApi.middleware
+        ),
+});
 
-setupListeners(store.dispatch)
+setupListeners(store.dispatch);

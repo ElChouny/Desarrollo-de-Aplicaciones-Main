@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import InputForm from '../components/InputForm';
 import SubmitButton from '../components/SubmitButton';
@@ -24,13 +24,17 @@ const Login = () => {
             console.log('Validating input...');
             loginSchema.validateSync({ email, password });
             console.log('Input validated. Triggering login...');
-            const response = await triggerLogin({ email, password });
+            const response = await triggerLogin({ email, password }).unwrap();
             console.log('Login successful:', response);
 
+            if (response.error) {
+                throw new Error(response.error.message);
+            }
+
             const user = {
-                email: response.data.email,
-                idToken: response.data.idToken,
-                localId: response.data.localId
+                email: response.email,
+                idToken: response.idToken,
+                localId: response.localId
             };
             dispatch(setUser(user));
             console.log('Deleting old session...');
@@ -57,7 +61,7 @@ const Login = () => {
                 }
             } else {
                 setEmailError('');
-                setPasswordError('Login failed. Please try again.');
+                setPasswordError(error.message || 'Login failed. Please try again.');
             }
         }
     };
@@ -119,6 +123,15 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
         marginTop: 20,
+    },
+    sub: {
+        marginTop: 20,
+        textAlign: 'center',
+    },
+    subLink: {
+        color: Colors.Azul,
+        textAlign: 'center',
+        marginTop: 10,
     },
 });
 

@@ -1,91 +1,53 @@
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from "expo-sqlite"
 
-const db = SQLite.openDatabaseSync("session.db");
-
+const db = SQLite.openDatabaseAsync('session.db');
 export const init = async () => {
     try {
-        db.transaction(tx => {
-            tx.executeSql(`
-                PRAGMA journal_mode = WAL;
-                CREATE TABLE IF NOT EXISTS sessionUser ( localId TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL, idToken TEXT NOT NULL );
-            `);
-        });
-        console.log('Database initialized and table created.');
+        const db = await SQLite.openDatabaseAsync("session.db")
+        const createTable = await db.execAsync(`
+                    PRAGMA journal_mode = WAL;
+            CREATE TABLE IF NOT EXISTS sessionUser (localId TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL,idToken TEXT NOT NULL);
+            `)
+        return createTable
     } catch (error) {
-        console.error('Error initializing database:', error);
-        throw error;
+        return error
     }
-};
+}
 
-export const insertSession = async (localId, email, idToken) => {
-    try {
-        console.log('Opening database...');
+export const insertSession = (localId, email, idToken) => {
+    return new SQLite.openDatabaseAsync((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `INSERT INTO sessionUser (localId, email, idToken) VALUES (?, ?, ?)`,
+                'INSERT INTO sessions (localId, email, idToken) VALUES (?, ?, ?)',
                 [localId, email, idToken],
-                (_, result) => {
-                    console.log('Session inserted:', { localId, email, idToken });
-                },
-                (_, error) => {
-                    console.error('Error inserting session:', error);
-                    return false;
-                }
+                (_, result) => resolve(result),
+                (_, error) => reject(error)
             );
         });
-    } catch (error) {
-        console.error('Error inserting session:', error);
-        throw error;
-    }
+    });
 };
 
 export const fetchSession = async () => {
     try {
-        console.log('Opening database...');
-        return new Promise((resolve, reject) => {
-            db.transaction(tx => {
-                tx.executeSql(
-                    `SELECT * FROM sessionUser LIMIT 1`,
-                    [],
-                    (_, { rows }) => {
-                        const sessionUser = rows.length > 0 ? rows.item(0) : null;
-                        console.log('Session fetched:', sessionUser);
-                        resolve(sessionUser);
-                    },
-                    (_, error) => {
-                        console.error('Error fetching session:', error);
-                        reject(error);
-                        return false;
-                    }
-                );
-            });
-        });
+        const db = await SQLite.openDatabaseAsync("session.db")
+        const sessionUser = await db.getFirstAsync(
+            `SELECT * FROM sessionUser `
+        )
+        return sessionUser
     } catch (error) {
-        console.error('Error fetching session:', error);
-        return null;
+        return error
     }
 };
 
-export const deleteSesion = async () => {
-    try {
-        console.log('Opening database...');
+export const deleteSesion = () => {
+    return new SQLite.openDatabaseAsync((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `DELETE FROM sessionUser`,
+                'DELETE FROM sessions',
                 [],
-                (_, result) => {
-                    console.log('Session deleted.');
-                },
-                (_, error) => {
-                    console.error('Error deleting session:', error);
-                    return false;
-                }
+                (_, result) => resolve(result),
+                (_, error) => reject(error)
             );
         });
-    } catch (error) {
-        console.error('Error deleting session:', error);
-        throw error;
-    }
+    });
 };
-
-export default db;

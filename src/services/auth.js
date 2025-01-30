@@ -1,27 +1,34 @@
-import { base_auth_url, api_key } from "../database"
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { api_key } from '../database'; // Asegúrate de que este archivo contenga tu api_key
 
-export const authApi = createApi({
-    reducerPath: "authApi",
-    baseQuery: fetchBaseQuery({ baseUrl: base_auth_url }),
+const authApi = createApi({
+    reducerPath: 'authApi',
+    baseQuery: fetchBaseQuery({ baseUrl: 'https://identitytoolkit.googleapis.com/v1/' }), // URL base para Firebase Authentication
     endpoints: (builder) => ({
-        signUp: builder.mutation({
-            query: (credentials) => ({
-                url: `accounts:signUp?key=${api_key}`,
-                method: "POST",
-                body: credentials,
-
-            })
-        }),
         login: builder.mutation({
             query: (credentials) => ({
-                url: `accounts:signInWithPassword?key=${api_key}`,
-                method: "POST",
-                body: credentials,
-
-            })
+                url: `accounts:signInWithPassword?key=${api_key}`, // Ruta para iniciar sesión en Firebase
+                method: 'POST',
+                body: {
+                    email: credentials.email,
+                    password: credentials.password,
+                    returnSecureToken: true,
+                },
+            }),
         }),
-    })
-})
+        signUp: builder.mutation({
+            query: (credentials) => ({
+                url: `accounts:signUp?key=${api_key}`, // Ruta para registrarse en Firebase
+                method: 'POST',
+                body: {
+                    email: credentials.email,
+                    password: credentials.password,
+                    returnSecureToken: true,
+                },
+            }),
+        }),
+    }),
+});
 
-export const { useSignUpMutation, useLoginMutation } = authApi
+export const { useLoginMutation, useSignUpMutation } = authApi;
+export default authApi;

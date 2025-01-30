@@ -1,38 +1,34 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import InputForm from '../components/InputForm';
 import SubmitButton from '../components/SubmitButton';
 import Colors from '../globals/Colors';
 import { useNavigation } from '@react-navigation/native';
-import { useSignUpMutation } from '../services/auth';
 import { useDispatch } from 'react-redux';
+import { useSignUpMutation } from '../services/auth';
 import signupSchema from '../validations/signupSchema';
 import { setUser } from '../features/userSlice';
 import { deleteSesion, insertSession } from '../config/dbSqlite';
 
 const Signup = () => {
-
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [emailError, setEmailError] = useState("")
-    const [passwordError, setPasswordError] = useState("")
-    const [confirmPasswordError, setConfirmPasswordError] = useState("")
-    const navigation = useNavigation()
-    const [triggerSignup] = useSignUpMutation()
-    const dispatch = useDispatch()
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [confirmPasswordError, setConfirmPasswordError] = useState("");
+    const [triggerSignup] = useSignUpMutation();
+    const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const onSubmit = async () => {
         try {
-            console.log('Validating input...');
             signupSchema.validateSync({ email, password, confirmPassword });
-            console.log('Input validated. Triggering signup...');
-            const response = await triggerSignup({ email, password });
-            console.log('Signup successful:', response);
+            const response = await triggerSignup({ email, password }).unwrap();
             const user = {
-                email: response.data.email,
-                idToken: response.data.idToken,
-                localId: response.data.localId
+                email: response.email,
+                idToken: response.idToken,
+                localId: response.localId,
             };
             dispatch(setUser(user));
             console.log('Deleting old session...');
@@ -43,14 +39,40 @@ const Signup = () => {
             navigation.navigate('Home');
         } catch (error) {
             console.error('Error during signup:', error);
-            setPasswordError(error.message);
+            if (error.path) {
+                switch (error.path) {
+                    case "password":
+                        setPasswordError(error.message);
+                        setEmailError("");
+                        setConfirmPasswordError("");
+                        break;
+                    case "email":
+                        setEmailError(error.message);
+                        setPasswordError("");
+                        setConfirmPasswordError("");
+                        break;
+                    case "confirmPassword":
+                        setConfirmPasswordError(error.message);
+                        setEmailError("");
+                        setPasswordError("");
+                        break;
+                    default:
+                        setEmailError("");
+                        setPasswordError("");
+                        setConfirmPasswordError("");
+                }
+            } else {
+                setEmailError("");
+                setPasswordError("Signup failed. Please try again.");
+                setConfirmPasswordError("");
+            }
         }
     };
 
     return (
         <View style={styles.main}>
             <View style={styles.container}>
-                <Text style={styles.title} >Registrarme</Text>
+                <Text style={styles.title}>Registrarse</Text>
                 <InputForm
                     label="Email"
                     value={email}
@@ -66,24 +88,21 @@ const Signup = () => {
                     error={passwordError}
                 />
                 <InputForm
-                    label="Confirmar password"
+                    label="Confirm Password"
                     value={confirmPassword}
                     onChangeText={(t) => setConfirmPassword(t)}
                     isSecure={true}
                     error={confirmPasswordError}
-
                 />
-                <SubmitButton style={styles.title} title="Registrarme" onPress={onSubmit}
-                />
-                <Text style={styles.sub}>Tenes cuenta registrada?</Text>
-                <Pressable onPress={() => navigation.navigate("Login")} >
-                    <Text style={styles.subLink}>Login</Text>
+                <SubmitButton style={styles.title} onPress={onSubmit} title="Registrarse" />
+                <Text style={styles.sub}>¿Ya tienes una cuenta?</Text>
+                <Pressable onPress={() => navigation.navigate("Login")}>
+                    <Text style={styles.subLink}>Ingresar</Text>
                 </Pressable>
             </View>
         </View>
-    )
-}
-
+    );
+};
 
 const styles = StyleSheet.create({
     main: {
@@ -97,7 +116,7 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: Colors.Arena,
         borderRadius: 10,
-        shadowColor: "black",
+        shadowColor: Colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
@@ -108,6 +127,21 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
+    },
+    SubmitButton: {
+        backgroundColor: Colors.Azul,
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 20,
+    },
+    sub: {
+        marginTop: 20,
+        textAlign: 'center',
+    },
+    subLink: {
+        color: Colors.Azul,
+        textAlign: 'center',
+        marginTop: 10,
     },
 });
 

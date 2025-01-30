@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Pressable } from 'react-native'
 import Entypo from '@expo/vector-icons/Entypo';
 import Colors from '../globals/Colors';
 import { useDeleteCartProductMutation } from '../services/carts';
@@ -18,12 +18,12 @@ const CardCartProduct = ({ product }) => {
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.description}>{description}</Text>
                 <View style={styles.containerText}>
-                    <Text style={styles.text}>Precio: {price}$  ARG</Text>
+                    <Text style={styles.text}>Precio: ${price}  USD</Text>
                     <Text style={styles.text}>Cantidad: {quantity}</Text>
                 </View>
             </View>
             <Pressable onPress={deleteCartProduct}>
-                <Entypo name="trash" size={30} color={colors.lightGray} />
+                <Entypo name="trash" size={30} color={Colors.lightGray} />
             </Pressable>
 
         </View>
