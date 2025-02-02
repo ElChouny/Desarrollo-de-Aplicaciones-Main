@@ -11,7 +11,13 @@ const MyProfile = () => {
     const localId = useSelector(state => state.user.localId)
     const { data: user, isLoading } = useGetUserQuery({ localId })
 
-
+    const onLogout = () => {
+        dispatch(clearUser())
+        clearSessions()
+            .then(()=>console.log("Sesion eliminada"))
+            .catch((error)=>console.log("Error al eliminar la sesion"))
+        }
+        navigation.navigate("Login")
     if (isLoading) return <View><Text>Cargando</Text></View>
 
     return (
@@ -42,4 +48,4 @@ const styles = StyleSheet.create({
         height: 150
     }
 })
-export default MyProfile
+export default MyProfile;

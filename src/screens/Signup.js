@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { useSignUpMutation } from '../services/auth';
 import signupSchema from '../validations/signupSchema';
 import { setUser } from '../features/userSlice';
-import { deleteSesion, insertSession } from '../config/dbSqlite';
+import { clearSessions, insertSession } from '../config/dbSqlite';
 
 const Signup = () => {
     const [email, setEmail] = useState("");
@@ -31,11 +31,15 @@ const Signup = () => {
                 localId: response.localId,
             };
             dispatch(setUser(user));
-            console.log('Deleting old session...');
-            await deleteSesion();
-            console.log('Inserting new session...');
-            await insertSession(user.localId, user.email, user.idToken);
-            console.log('User registered and session saved.');
+            clearSessions()
+                .then(() => console.log("sesiones eliminadas"))
+                .catch(error => console.log("Error al eliminar las sesiones: ", error));
+            
+            insertSession({
+                email: response.email,
+                idToken: response.idToken,
+                localId: response.localId,
+            })
             navigation.navigate('Home');
         } catch (error) {
             console.error('Error during signup:', error);

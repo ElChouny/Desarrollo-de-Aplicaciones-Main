@@ -1,53 +1,30 @@
-import * as SQLite from "expo-sqlite"
+import * as SQLite from "expo-sqlite";
 
-const db = SQLite.openDatabaseAsync('session.db');
-export const init = async () => {
-    try {
-        const db = await SQLite.openDatabaseAsync("session.db")
-        const createTable = await db.execAsync(`
-                    PRAGMA journal_mode = WAL;
-            CREATE TABLE IF NOT EXISTS sessionUser (localId TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL,idToken TEXT NOT NULL);
-            `)
-        return createTable
-    } catch (error) {
-        return error
-    }
-}
+export const db = SQLite.openDatabaseAsync("sessionUser.db");
 
-export const insertSession = (localId, email, idToken) => {
-    return new SQLite.openDatabaseAsync((resolve, reject) => {
-        db.transaction(tx => {
-            tx.executeSql(
-                'INSERT INTO sessions (localId, email, idToken) VALUES (?, ?, ?)',
-                [localId, email, idToken],
-                (_, result) => resolve(result),
-                (_, error) => reject(error)
-            );
-        });
-    });
+export const createSessionTable = async () => {
+    const access = await db;
+    await access.execAsync(`
+        CREATE TABLE IF NOT EXISTS sessionUser (localId TEXT PRIMARY KEY NOT NULL, email TEXT NOT NULL, idToken TEXT NOT NULL)
+        `);
+    (error) => {
+        console.error('Error initializing database:', error);
+    };
+};
+
+export const insertSession = async ({ email, localId, idToken }) => {
+    const access = await db;
+    const result = await access.runAsync('INSERT INTO sessionUser (localId, email, idToken) VALUES (?, ?, ?)', email, localId, idToken);
 };
 
 export const fetchSession = async () => {
-    try {
-        const db = await SQLite.openDatabaseAsync("session.db")
-        const sessionUser = await db.getFirstAsync(
-            `SELECT * FROM sessionUser `
-        )
-        return sessionUser
-    } catch (error) {
-        return error
-    }
+    const access = await db;
+    const result = await access.getAllAsync
+        ('SELECT * FROM sessionUser');
+    return result;
 };
 
-export const deleteSesion = () => {
-    return new SQLite.openDatabaseAsync((resolve, reject) => {
-        db.transaction(tx => {
-            tx.executeSql(
-                'DELETE FROM sessions',
-                [],
-                (_, result) => resolve(result),
-                (_, error) => reject(error)
-            );
-        });
-    });
+export const clearSessions = async () => {
+    const access = await db;
+    const result = await access.runAsync('DELETE FROM sessionUser');
 };

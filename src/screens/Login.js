@@ -8,28 +8,21 @@ import { useLoginMutation } from '../services/auth';
 import { useDispatch } from 'react-redux';
 import loginSchema from '../validations/loginSchema';
 import { setUser } from '../features/userSlice';
-import { deleteSesion, insertSession } from '../config/dbSqlite';
+import { clearSessions, insertSession } from '../config/dbSqlite';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [emailError, setEmailError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const dispatch = useDispatch();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const navigation = useNavigation();
-    const [triggerLogin] = useLoginMutation();
+    const [triggerLogin, result] = useLoginMutation();
+    const dispatch = useDispatch();
 
     const onSubmit = async () => {
         try {
-            console.log('Validating input...');
             loginSchema.validateSync({ email, password });
-            console.log('Input validated. Triggering login...');
             const response = await triggerLogin({ email, password }).unwrap();
-            console.log('Login successful:', response);
-
-            if (response.error) {
-                throw new Error(response.error.message);
-            }
 
             const user = {
                 email: response.email,
@@ -37,31 +30,35 @@ const Login = () => {
                 localId: response.localId
             };
             dispatch(setUser(user));
-            console.log('Deleting old session...');
-            await deleteSesion();
-            console.log('Inserting new session...');
-            await insertSession(user.localId, user.email, user.idToken);
-            console.log('User logged in and session saved.');
+            clearSessions()
+                .then(() => console.log("sesiones eliminadas"))
+                .catch(error => console.log("Error al eliminar las sesiones: ", error));
+            console.log("result data:", result.data);
+            insertSession({
+                email: response.email,
+                idToken: response.idToken,
+                localId: response.localId
+            })
             navigation.navigate('Home');
         } catch (error) {
             console.error('Error during login:', error);
             if (error.path) {
                 switch (error.path) {
-                    case 'email':
+                    case "email":
                         setEmailError(error.message);
-                        setPasswordError('');
+                        setPasswordError("");
                         break;
-                    case 'password':
+                    case "password":
                         setPasswordError(error.message);
-                        setEmailError('');
+                        setEmailError("");
                         break;
                     default:
-                        setEmailError('');
-                        setPasswordError('');
+                        setEmailError("");
+                        setPasswordError("Login failed. Please try again.");
                 }
             } else {
-                setEmailError('');
-                setPasswordError(error.message || 'Login failed. Please try again.');
+                setEmailError("");
+                setPasswordError("Login failed. Please try again.");
             }
         }
     };

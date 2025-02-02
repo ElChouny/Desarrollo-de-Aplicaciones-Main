@@ -2,15 +2,16 @@ import { StyleSheet, Text, View, FlatList, Pressable } from 'react-native'
 import CardCartProduct from '../components/CardCartProduct'
 import Colors from '../globals/Colors'
 import { usePostOrdersMutation } from '../services/orders'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useGetCartQuery, useDeleteCartMutation } from '../services/carts'
 import { useEffect, useState } from 'react'
 import EmptyListComponent from '../components/EmptyListComponent'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useNavigation } from '@react-navigation/native'
-
+import { clearSessions } from '../config/dbSqlite';
 
 const Cart = () => {
+    const dispatch = useDispatch()
     const navigation = useNavigation()
     const [triggerPost] = usePostOrdersMutation()
     const [triggerDeleteCart] = useDeleteCartMutation()
@@ -36,7 +37,8 @@ const Cart = () => {
         triggerPost({ order, localId })
         triggerDeleteCart({ localId })
         navigation.navigate("OrdersStack")
-    }
+    };
+
     if (isLoading) return <LoadingSpinner />
     if (!cart) return <EmptyListComponent message="No hay productos en el carrito" />
     return (
@@ -51,6 +53,7 @@ const Cart = () => {
                 <Pressable style={styles.button} onPress={confirmCart}>
                     <Text style={styles.buttonText}>Finalizar Compra</Text>
                 </Pressable>
+
             </View>
         </View>
     )

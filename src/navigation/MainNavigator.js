@@ -1,38 +1,55 @@
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { NavigationContainer } from "@react-navigation/native";
-import AuthStack from "./AuthStack";
-import Navigator from "./Navigator";
-import { useSelector } from "react-redux";
 import { useEffect } from "react";
-import { fetchSession } from "../config/dbSqlite";
-import { useDispatch } from "react-redux";
-import { setUser } from "../features/userSlice";
-import { init } from "../config/dbSqlite";
-import { removeUser } from "../features/userSlice";
+import { useSelector, useDispatch } from "react-redux";
+
+import TabNavigator from "./TabNavigator";
+import AuthNavigator from "./AuthNavigator";
+
+import { useGetProfilePictureQuery } from "../services/userService";
+import { setProfilePicture } from "../features/auth/authSlice";
+
+import { fetchSession } from "../db";
+import { setUser } from "../features/auth/authSlice";
+
 const MainNavigator = () => {
-    const idToken = useSelector((state) => state.user.idToken);
-    const dispatch = useDispatch();
+    const user = useSelector(state => state.userReducer.value.email)
+    const localId = useSelector(state => state.userReducer.value.localId)
+
+    const dispatch = useDispatch()
+
+    const { data: profilePicture, isLoading, error } = useGetProfilePictureQuery(localId)
 
     useEffect(() => {
-        (async () => {
-            try {
-                await init();
-                //dispatch(removeUser());
-                const sessionUser = await fetchSession();
-                console.log(sessionUser);
-                if (sessionUser) {
-                    dispatch(setUser(sessionUser));
+        if (!user) {
+            (async () => {
+                try {
+                    const session = await fetchSession()
+                    if (session.length) {
+                        dispatch(setUser(session[0]))
+                    }
+                } catch (error) {
+                    console.log("Error al obtener la sesión", error)
                 }
-            } catch (error) {
-                console.log(error);
-            }
-        })()
-    }, []);
+            })()
+        }
+    }, [user])
+
+    useEffect(() => {
+        if (profilePicture) {
+            dispatch(setProfilePicture(profilePicture.image))
+        }
+
+    }, [profilePicture])
+
 
     return (
         <NavigationContainer>
-            {idToken ? <Navigator /> : <AuthStack />}
+            {
+                user ? <TabNavigator /> : <AuthStack />
+            }
         </NavigationContainer>
-    );
-};
+    )
+}
 
-export default MainNavigator;
+export default MainNavigator

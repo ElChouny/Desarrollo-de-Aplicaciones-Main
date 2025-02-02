@@ -1,36 +1,37 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native'
-import Colors from '../globals/Colors'
-import ArrowGoBack from './ArrowGoBack'
-import { useNavigation } from '@react-navigation/native'
+import { StyleSheet, Text, View, Pressable } from 'react-native';
+import Colors from '../globals/Colors';
+import ArrowGoBack from './ArrowGoBack';
+import { useNavigation } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { deleteUser } from '../features/userSlice';
+import { clearUser } from '../features/userSlice';
 import { useDispatch } from 'react-redux';
-import { deleteSesion } from '../config/dbSqlite';
-
-
+import { clearSessions } from '../config/dbSqlite';
 
 const Header = ({ title }) => {
+    const Navigation = useNavigation();
+    const dispatch = useDispatch();
 
-    const navigate = useNavigation()
-    const dispatch = useDispatch()
 
-    const onLogout = () => {
-        deleteSesion()
-        dispatch(deleteUser())
-    }
+
+        const onLogout = () => {
+            dispatch(clearUser())
+            clearSessions()
+                .then(()=>console.log("Sesion eliminada"))
+                .catch((error)=>console.log("Error al eliminar la sesion"))
+            }
 
     return (
         <View style={styles.container}>
-            {navigate.canGoBack() ? <ArrowGoBack /> : null}
+            {Navigation.canGoBack() ? <ArrowGoBack /> : null}
             <Text style={styles.title}>{title}</Text>
             <Pressable onPress={onLogout} style={styles.logout}>
                 <AntDesign name="logout" size={20} color={Colors.lightGray} />
             </Pressable>
         </View>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;
 
 const styles = StyleSheet.create({
     container: {
@@ -42,7 +43,12 @@ const styles = StyleSheet.create({
     },
     title: {
         color: Colors.lightGray,
-        fontSize: 16,
+        fontSize: 20,
+        fontWeight: "bold",
         fontFamily: "josefin"
+    },
+    logout: {
+        position: "absolute",
+        right: 20,
     }
-})
+});

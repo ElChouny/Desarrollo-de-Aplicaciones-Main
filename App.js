@@ -6,7 +6,7 @@ import Fonts from './src/globals/Fonts'
 import Navigator from './src/navigation/Navigator'
 import { Provider } from 'react-redux'
 import { store } from './src/store'
-import { init } from './src/config/dbSqlite'
+import { createSessionTable } from './src/config/dbSqlite'
 
 export default function App() {
   const [fontsLoaded] = useFonts(Fonts);
@@ -14,7 +14,7 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await init();
+        const response = await createSessionTable();
         console.log(response);
       } catch (error) {
         console.error('Error during initialization:', error);

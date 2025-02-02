@@ -1,51 +1,40 @@
-import { StyleSheet } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Colors from '../globals/Colors';
-import TapNavigator from './TabNavigator';
-import AuthStack from './AuthStack';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchSession } from '../config/dbSqlite';
-import { useEffect } from 'react';
-import { deleteUser, setUser } from '../features/userSlice';
-import { init } from '../config/dbSqlite'
-
-const Tab = createBottomTabNavigator();
+import { useEffect } from "react"
+import { NavigationContainer } from "@react-navigation/native"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchSession } from "../config/dbSqlite"
+import { setUser } from "../features/userSlice"
+import TabNavigator from "./TabNavigator"
+import AuthStack from "./AuthStack"
 
 const Navigator = () => {
-
-    const idToken = useSelector(state => state.user.idToken)
+    const user = useSelector((state) => state.user.value.idToken)
     const dispatch = useDispatch()
 
     useEffect(() => {
-        (async () => {
+        const checkSession = async () => {
             try {
-                console.log('Initializing database...');
-                await init();
-                const sessionUser = await fetchSession();
-                if (sessionUser) {
-                    console.log('Session found:', sessionUser);
-                    dispatch(setUser(sessionUser));
-                } else {
-                    console.log('No session found.');
+                const sessionUser = await fetchSession()
+                if (sessionUser && sessionUser.length > 0) {
+                    dispatch(
+                        setUser({
+                            email: sessionUser[0].email,
+                            idToken: sessionUser[0].idToken,
+                            localId: sessionUser[0].localId,
+                        }),
+                    )
                 }
             } catch (error) {
-                console.error('Error during initialization:', error);
+                console.log("Error checking session:", error)
             }
-        })();
-    }, [dispatch]);
+        }
 
-    return (
-        <NavigationContainer>
-            {idToken ? <TapNavigator /> : <AuthStack />}
+        checkSession()
+    }, [dispatch])
+
+    return <NavigationContainer>
+        {user ? <TabNavigator /> : <AuthStack />}
         </NavigationContainer>
-    )
 }
 
-const styles = StyleSheet.create({
-    tabBar: {
-        backgroundColor: Colors.AzulMarino,
-        height: 70
-    }
-})
 export default Navigator
+
